@@ -1,0 +1,136 @@
+﻿@using Shared.Command
+
+@{
+    var person = ViewData["Person"] as GetPersonByIdDto;
+}
+
+<div class="card">
+    <div class="col-md-12 card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Person Details for ID: @person!.Id</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-7">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th class="bg-light" style="width: 30%">First Name</th>
+                            <td>@person!.FirstName</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Last Name</th>
+                            <td>@person!.LastName</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Personal Number</th>
+                            <td>@person.PersonalNumber</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Birth Date</th>
+                            <td>@(person.DateOfBirth.ToString("dd.MM.yyyy"))</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Gender</th>
+                            <td>@person.Gender</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">City</th>
+                            <td>@(person.City?.Name ?? "Not specified")</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Phone Numbers</th>
+                            <td>
+                                @if (person.PhoneNumbers != null && person.PhoneNumbers.Any())
+                                {
+                                    @foreach (var phone in person.PhoneNumbers)
+                                    {
+                                        <div class="text-dark">
+                                            <i class="bi bi-telephone-fill me-2"></i>
+                                            @($"{phone.PhoneNumberType}: {phone.PhoneNumber}")
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No phone numbers available</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Relations</th>
+                            <td>
+                                @if (person.RelatedPersons != null && person.RelatedPersons.Any())
+                                {
+                                    
+                                    @foreach (var relatedPerson in person.RelatedPersons)
+                                    {
+                                       <strong>@relatedPerson.Name</strong>
+                                        @if (relatedPerson.RelatedInfo != null && relatedPerson.RelatedInfo.Any())
+                                        {
+                                            <div class="text-dark">
+                                               @foreach (var relation in relatedPerson.RelatedInfo)
+                                               {
+                                                 <span class="text-muted">@relation.Key: @relation.Value</span>
+                                               }
+                                            </div>
+                                        }
+                                            
+                                    }                                  
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No related persons</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-5 d-flex justify-content-center align-items-center">
+                    @if (!string.IsNullOrEmpty(person.ImagePath))
+                    {
+                        <div class="text-center" style="width: 300px; height: 300px; overflow: hidden;">
+                            <img src="@Url.Content("~/" + person.ImagePath)"
+                                 class="img-fluid rounded shadow"
+                                 style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div class="card h-200 d-flex justify-content-center align-items-center bg-light">
+                            <div class="text-center text-muted p-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                                </svg>
+                                <p class="mt-3">No image available</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="mt-4 text-center">
+                
+                @if (ViewData["PrevPersonId"] != null)
+                {
+                    <a href="/PhysicalPerson/Details?personId=@ViewData["PrevPersonId"]" class="btn btn-outline-primary ms-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                        </svg>
+                        Previous
+                    </a>
+                }
+
+                @if (ViewData["NextPersonId"] != null)
+                {
+                    <a href="/PhysicalPerson/Details?personId=@ViewData["NextPersonId"]" class="btn btn-outline-primary ms-2">
+                        Next
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 4.646 3.354a.5.5 0 0 1 0-.708z" />
+                        </svg>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

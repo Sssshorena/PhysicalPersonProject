@@ -1,0 +1,201 @@
+﻿@model Shared.Command.CreatePersonCommandDto
+
+
+UI For Add Person
+
+<form asp-action="create-person" method="post" class="m-2">
+    <div class="form-group">
+        <div asp-validation-summary="All" class="text-danger"></div>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="FirstName" data-val="true" class="form-label">Person First Name:</label>
+        <input asp-for="FirstName" class="form-control"/>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="LastName" class="form-label">Person Last Name:</label>
+        <input asp-for="LastName" class="form-control"/>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PersonalNumber" class="form-label">Person Personal Number:</label>
+        <input asp-for="PersonalNumber" class="form-control"/>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Gender" class="form-label">Person Gender:</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DateOfBirth"></label>
+        <input asp-for="DateOfBirth" class="form-control" type="date"/>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="City!.Id" class="form-label">Person City:</label>
+        <select id="cityDropdown" asp-for="City!.Id" asp-items="@(new SelectList(ViewBag.Cities, "Id", "Name"))" class="form-control">
+            <option value="">-- Select City --</option>
+            <option value="0">Other</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="customCityDiv" style="display: none;">
+        <label asp-for="City!.Name" class="form-label">Enter City Name:</label>
+        <input asp-for="City!.Name" class="form-control" placeholder="Enter new city name">
+    </div>
+
+    <!-- Phone Numbers Section -->
+    <div class="form-group mb-3">
+        <label class="form-label">Phone Number:</label>
+        <div id="phone-numbers-container">
+            <div class="phone-number-item row mb-2">
+                <div class="col-6">
+                    <select asp-for="PhoneNumbers[0]!.Type" class="form-control">
+                        <option value="1">Mobile</option>
+                        <option value="2">Office</option>
+                        <option value="3">Home</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <input asp-for="PhoneNumbers[0]!.Number" class="form-control" placeholder="Phone Number" />
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-success mt-2" id="add-phone-btn">Add Phone Number</button>
+    </div>
+
+    <!-- Upload Profile Picture -->
+    <div class="form-group">
+        <label asp-for="ProfileImage" class="form-label">Profile Picture:</label>
+        <input type="file" asp-for="ProfileImage" id="profileImageInput" class="form-control" accept="image/*" />
+        <div class="mt-2">
+            <img id="profileImagePreview" src="" alt="Profile Preview" style="max-width: 200px; display: none;" class="mt-2" />
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary mt-3" name="submit" value="Save Person" />
+</form>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    // Age validation
+           $(document).ready(function() {
+        $.validator.unobtrusive.adapters.add("customage", [], function (options) {
+            options.rules["customage"] = {
+                minDate: options.element.getAttribute("data-val-customAge-minDate")
+            };
+            options.messages["customage"] = options.message;
+        });
+
+        $.validator.addMethod("customage", function(value, element, params) {
+            let enteredDate = new Date(value);
+            let minBirthDate = new Date(params.minDate);
+            return enteredDate <= minBirthDate;
+        }, "You must be at least 18 years old.");
+
+        $.validator.unobtrusive.parse(document);
+    });
+
+
+    // Phone numbers handling
+    $(document).ready(function() {
+        let phoneIndex = $("#phone-numbers-container .phone-number-item").length;
+
+        $("#add-phone-btn").click(function() {
+            const newItem = `
+            <div class="phone-number-item row mb-2">
+                <div class="col-6">
+                    <select name="PhoneNumbers[${phoneIndex}].Type" class="form-control">
+                        <option value="1">Mobile</option>
+                        <option value="2">Office</option>
+                        <option value="3">Home</option>
+                    </select>
+                </div>
+                <div class="col-5">
+                    <input name="PhoneNumbers[${phoneIndex}].Number" class="form-control" placeholder="Phone Number" />
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-danger remove-phone-btn">X</button>
+                </div>
+            </div>`;
+            $("#phone-numbers-container").append(newItem);
+             phoneIndex++;
+        });
+
+        $(document).on("click", ".remove-phone-btn", function() {
+            $(this).closest(".phone-number-item").remove();
+            phoneIndex--;
+
+            $("#phone-numbers-container .phone-number-item").each(function(index) {
+                $(this).find("select").attr("name", `PhoneNumbers[${index}].Type`);
+                $(this).find("input").attr("name", `PhoneNumbers[${index}].Number`);
+            });
+        });
+    });
+     // City dropdown
+    document.getElementById("cityDropdown").addEventListener("change", function () {
+        let customCityDiv = document.getElementById("customCityDiv");
+        let cityNameInput = document.querySelector("input[name='City.Name']");
+
+        if (this.value === "0") {
+            customCityDiv.style.display = "block";
+        } else {
+            customCityDiv.style.display = "none";
+            cityNameInput.value = "";
+        }
+    });
+
+       // Image preview
+        $("#profileImageInput").change(function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $("#profileImagePreview").attr("src", e.target.result);
+                    $("#profileImagePreview").show();
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+ // Пример кода для отправки формы через AJAX
+$("form").submit(function(e) {
+    e.preventDefault();
+    
+    var formData = new FormData(this);
+    
+    $.ajax({
+        url: $(this).attr("action"),
+        type: "POST",
+        data: formData,
+        processData: false,  
+        contentType: false,  
+        success: function(response) {
+            console.log("Success:", response);
+           alert("Person created successfully with ID: " + response.Id);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error:", xhr.responseText);
+            alert("Error creating person: " + xhr.responseText);
+        }
+    });
+});
+</script>
+
