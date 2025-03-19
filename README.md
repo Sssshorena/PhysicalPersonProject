@@ -16,5 +16,5 @@ Key Features:
 
 ### 1. Clone the repository
 ```sh
-git clone https://github.com/Sssshorena/shorenarevazishvili.git
-cd shorenarevazishvili
+git clone https://github.com/Sssshorena/PhysicalPersonProject.git
+cd your-repository
